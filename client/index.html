@@ -1,0 +1,18 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <script type="text/javascript">
+    // Write your code in the same way as for native WebSocket:
+    var ws = new WebSocket("ws://localhost:8080/");
+
+    ws.onmessage = function(e) {
+        // Receives a message.
+        alert(e.data);
+    };
+  </script>
+</head>
+
+<body>
+</body>
+</html>
