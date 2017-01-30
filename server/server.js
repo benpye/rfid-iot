@@ -3,6 +3,7 @@ const Sequelize = require('sequelize');
 const epilogue = require('epilogue');
 const express = require('express');
 const bodyParser = require('body-parser');
+const LinuxInputListener = require('linux-input-device');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
@@ -56,16 +57,25 @@ function databaseReady() {
     Scan.create({rfid: rfid});
   }
 
+  var input = new LinuxInputListener('/dev/input/event0');
+
+  var rfidString = '';
+
+  input.on('state',(value, key, kind) => {
+      if(value == true && kind == 'EV_KEY') {
+          if(key == 28) { // Newline
+              console.log('Read rfid: ' + rfidString);
+              rfidScanned(rfidString);
+              rfidString = '';
+          } else { // Add to existing string
+              rfidString = rfidString + '1234567890'[key - 2];
+          }
+      }
+  });
+
+  input.on('error', console.error);
+
   app.listen(8081, function() {
     console.log('REST server listening');
   });
-
-  // Test code
-  (function loop() {
-    var rand = Math.round(Math.random() * (3000 - 500)) + 500;
-    setTimeout(function() {
-            rfidScanned("1234567890");
-            loop();
-    }, rand);
-  }());
 }
